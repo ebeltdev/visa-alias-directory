@@ -20,8 +20,7 @@ public record CreateAliasRequest(
         Consent consent,
 
         @NotEmpty(message = "paymentCredentials is required")
-        @Valid
-        List<PaymentCredential> paymentCredentials,
+        List<@Valid PaymentCredential> paymentCredentials,
 
         @NotNull(message = "profile is required")
         @Valid

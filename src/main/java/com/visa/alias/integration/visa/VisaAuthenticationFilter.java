@@ -21,7 +21,9 @@ public class VisaAuthenticationFilter implements ClientRequestFilter {
         @Override
         public void filter(ClientRequestContext requestContext) {
 
-                String credentials = visaConfig.userId() + ":" + visaConfig.password();
+                String credentials = visaConfig.userId()
+                                + ":"
+                                + visaConfig.password();
 
                 String basicAuth = Base64.getEncoder()
                                 .encodeToString(
@@ -30,5 +32,9 @@ public class VisaAuthenticationFilter implements ClientRequestFilter {
                 requestContext.getHeaders().putSingle(
                                 "Authorization",
                                 "Basic " + basicAuth);
+
+                requestContext.getHeaders().putSingle(
+                                "keyId",
+                                visaConfig.mleKeyId());
         }
 }

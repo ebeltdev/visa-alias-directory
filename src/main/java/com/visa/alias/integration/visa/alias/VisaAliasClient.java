@@ -1,22 +1,83 @@
 package com.visa.alias.integration.visa.alias;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.visa.alias.client.VisaAliasRestClient;
+import com.visa.alias.dto.visa.VisaErrorResponse;
+import com.visa.alias.exception.VisaApiException;
+import com.visa.alias.exception.VisaIntegrationException;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasResponse;
+import com.visa.alias.integration.visa.common.dto.VisaEncryptedPayload;
+import com.visa.alias.integration.visa.crypto.MleDecryptionService;
+import com.visa.alias.integration.visa.crypto.MleEncryptionService;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 public class VisaAliasClient {
 
-    @Inject
-    @RestClient
-    VisaAliasRestClient restClient;
+        @Inject
+        @RestClient
+        VisaAliasRestClient restClient;
 
-    public VisaCreateAliasResponse createAlias(
-            VisaCreateAliasRequest request) {
+        @Inject
+        ObjectMapper objectMapper;
 
-        return restClient.createAlias(request);
-    }
+        @Inject
+        MleEncryptionService mleEncryptionService;
+
+        @Inject
+        MleDecryptionService mleDecryptionService;
+
+        public VisaCreateAliasResponse createAlias(
+                        VisaCreateAliasRequest request) {
+
+                try {
+                        String requestJson = objectMapper.writeValueAsString(request);
+
+                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
+
+                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+
+                        try (Response response = restClient.createAlias(encryptedPayload)) {
+
+                                String responseBody = response.readEntity(String.class);
+
+                                VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
+                                                responseBody,
+                                                VisaEncryptedPayload.class);
+
+                                String decryptedJson = mleDecryptionService.decrypt(
+                                                encryptedResponse.encData());
+
+                                if (response.getStatusInfo()
+                                                .getFamily() == Response.Status.Family.SUCCESSFUL) {
+
+                                        return objectMapper.readValue(
+                                                        decryptedJson,
+                                                        VisaCreateAliasResponse.class);
+                                }
+
+                                VisaErrorResponse visaError = objectMapper.readValue(
+                                                decryptedJson,
+                                                VisaErrorResponse.class);
+
+                                throw new VisaApiException(
+                                                response.getStatus(),
+                                                visaError.errorCode(),
+                                                visaError.errorMessages());
+                        }
+
+                } catch (VisaApiException e) {
+                        throw e;
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to communicate with Visa Alias Directory",
+                                        e);
+                }
+        }
 }

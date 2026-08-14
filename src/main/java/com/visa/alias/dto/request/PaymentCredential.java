@@ -30,7 +30,6 @@ public record PaymentCredential(
 
         String externalId,
 
-        @Valid
-        java.util.List<PreferredFor> preferredFor
+        java.util.List<@Valid PreferredFor> preferredFor
 ) {
 }

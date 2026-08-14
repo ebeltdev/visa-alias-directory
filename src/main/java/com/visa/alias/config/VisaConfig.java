@@ -7,8 +7,6 @@ public interface VisaConfig {
 
     String baseUrl();
 
-    String apiKey();
-
     String userId();
 
     String password();
@@ -18,6 +16,8 @@ public interface VisaConfig {
     String clientKeyStorePassword();
 
     String mleKeyId();
+
+    String mleServerCertificate();
 
     String mlePrivateKey();
 }

@@ -25,7 +25,6 @@ public record Profile(
 
         String dateOfBirth,
 
-        @Valid
-        List<ContactInfo> contactInfo
+        List<@Valid ContactInfo> contactInfo
 ) {
 }
