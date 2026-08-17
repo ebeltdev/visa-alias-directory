@@ -4,6 +4,7 @@ import com.visa.alias.integration.visa.VisaAuthenticationFilter;
 import com.visa.alias.integration.visa.common.dto.VisaEncryptedPayload;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -21,14 +22,19 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @Produces(MediaType.APPLICATION_JSON)
 public interface VisaAliasRestClient {
 
-    @POST
-    @Path("/aliases")
-    Response createAlias(
-            VisaEncryptedPayload request);
+        @POST
+        @Path("/aliases")
+        Response createAlias(
+                        VisaEncryptedPayload request);
 
-    @PUT
-    @Path("/aliases/{aliasId}")
-    Response updateAlias(
-            @PathParam("aliasId") String aliasId,
-            VisaEncryptedPayload request);
+        @PUT
+        @Path("/aliases/{aliasId}")
+        Response updateAlias(
+                        @PathParam("aliasId") String aliasId,
+                        VisaEncryptedPayload request);
+
+        @DELETE
+        @Path("/aliases/{aliasId}")
+        Response deleteAlias(
+                        @PathParam("aliasId") String aliasId);
 }

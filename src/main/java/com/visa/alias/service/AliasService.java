@@ -6,10 +6,13 @@ import com.visa.alias.dto.response.CreateAliasResponse;
 
 public interface AliasService {
 
-    CreateAliasResponse createAlias(
-            CreateAliasRequest request);
+        CreateAliasResponse createAlias(
+                        CreateAliasRequest request);
 
-    void updateAlias(
-            String aliasId,
-            UpdateAliasRequest request);
+        void updateAlias(
+                        String aliasId,
+                        UpdateAliasRequest request);
+
+        void deleteAlias(
+                        String aliasId);
 }

@@ -40,4 +40,9 @@ public class AliasServiceImpl implements AliasService {
                                 aliasId,
                                 visaRequest);
         }
+
+        @Override
+        public void deleteAlias(String aliasId) {
+                visaAliasClient.deleteAlias(aliasId);
+        }
 }

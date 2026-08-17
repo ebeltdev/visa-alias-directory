@@ -119,6 +119,31 @@ public class VisaAliasClient {
                 }
         }
 
+        public void deleteAlias(String aliasId) {
+
+                try (Response response = restClient.deleteAlias(aliasId)) {
+
+                        int status = response.getStatus();
+
+                        if (status >= 200 && status < 300) {
+                                return;
+                        }
+
+                        handleVisaError(response);
+
+                } catch (VisaApiException e) {
+                        throw e;
+
+                } catch (VisaIntegrationException e) {
+                        throw e;
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to delete alias in Visa Alias Directory",
+                                        e);
+                }
+        }
+
         private void handleVisaError(Response response) {
 
                 try {
