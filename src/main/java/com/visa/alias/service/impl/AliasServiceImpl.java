@@ -1,11 +1,15 @@
 package com.visa.alias.service.impl;
 
 import com.visa.alias.dto.request.CreateAliasRequest;
+import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.UpdateAliasRequest;
 import com.visa.alias.dto.response.CreateAliasResponse;
+import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.VisaAliasClient;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasResponse;
+import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialRequest;
+import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasRequest;
 import com.visa.alias.integration.visa.alias.mapper.VisaAliasMapper;
 import com.visa.alias.service.AliasService;
@@ -44,5 +48,19 @@ public class AliasServiceImpl implements AliasService {
         @Override
         public void deleteAlias(String aliasId) {
                 visaAliasClient.deleteAlias(aliasId);
+        }
+
+        @Override
+        public CreatePaymentCredentialResponse createPaymentCredential(
+                        String aliasId,
+                        CreatePaymentCredentialRequest request) {
+
+                VisaCreatePaymentCredentialRequest visaRequest = VisaAliasMapper.toVisaRequest(request);
+
+                VisaCreatePaymentCredentialResponse visaResponse = visaAliasClient.createPaymentCredential(
+                                aliasId,
+                                visaRequest);
+
+                return VisaAliasMapper.toResponse(visaResponse);
         }
 }

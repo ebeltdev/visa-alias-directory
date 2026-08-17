@@ -2,16 +2,22 @@ package com.visa.alias.integration.visa.alias.mapper;
 
 import com.visa.alias.dto.request.Consent;
 import com.visa.alias.dto.request.CreateAliasRequest;
+import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.Identification;
 import com.visa.alias.dto.request.Profile;
 import com.visa.alias.dto.request.UpdateAliasRequest;
 import com.visa.alias.dto.response.CreateAliasResponse;
+import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
 import com.visa.alias.dto.response.PaymentCredentialResponse;
+import com.visa.alias.integration.visa.alias.dto.VisaBillingAddress;
 import com.visa.alias.integration.visa.alias.dto.VisaConsent;
 import com.visa.alias.integration.visa.alias.dto.VisaContactInfo;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasResponse;
+import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialRequest;
+import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaIdentification;
+import com.visa.alias.integration.visa.alias.dto.VisaPreferredFor;
 import com.visa.alias.integration.visa.alias.dto.VisaProfile;
 import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaVerificationDetails;
@@ -34,6 +40,42 @@ public final class VisaAliasMapper {
                                 request.profile(),
                                 request.externalId(),
                                 request.identification());
+        }
+
+        public static VisaCreatePaymentCredentialRequest toVisaRequest(
+                        CreatePaymentCredentialRequest request) {
+
+                VisaBillingAddress billingAddress = request.billingAddress() == null
+                                ? null
+                                : new VisaBillingAddress(
+                                                request.billingAddress().country(),
+                                                request.billingAddress().addressLine1(),
+                                                request.billingAddress().addressLine2(),
+                                                request.billingAddress().buildingNumber(),
+                                                request.billingAddress().city(),
+                                                request.billingAddress().minorSubdivisionCode(),
+                                                request.billingAddress().postalCode(),
+                                                request.billingAddress().state(),
+                                                request.billingAddress().streetName());
+
+                var preferredFor = request.preferredFor() == null
+                                ? null
+                                : request.preferredFor()
+                                                .stream()
+                                                .map(item -> new VisaPreferredFor(item.type()))
+                                                .toList();
+
+                return new VisaCreatePaymentCredentialRequest(
+                                request.accountNumber(),
+                                billingAddress,
+                                request.cardType(),
+                                request.expirationDate(),
+                                request.issuerName(),
+                                request.nameOnCard(),
+                                request.type(),
+                                request.currencyCode(),
+                                request.externalId(),
+                                preferredFor);
         }
 
         public static VisaUpdateAliasRequest toVisaRequest(
@@ -62,6 +104,15 @@ public final class VisaAliasMapper {
                                 response.id(),
                                 response.externalId(),
                                 credentials);
+        }
+
+        public static CreatePaymentCredentialResponse toResponse(
+                        VisaCreatePaymentCredentialResponse response) {
+
+                return new CreatePaymentCredentialResponse(
+                                response.id(),
+                                response.type(),
+                                response.externalId());
         }
 
         private static VisaConsent toVisaConsent(
