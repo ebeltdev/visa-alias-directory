@@ -1,10 +1,13 @@
 package com.visa.alias.service;
 
+import java.util.List;
+
 import com.visa.alias.dto.request.CreateAliasRequest;
 import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.UpdateAliasRequest;
 import com.visa.alias.dto.response.CreateAliasResponse;
 import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
+import com.visa.alias.dto.response.GetPaymentCredentialResponse;
 
 public interface AliasService {
 
@@ -21,4 +24,7 @@ public interface AliasService {
         CreatePaymentCredentialResponse createPaymentCredential(
                         String aliasId,
                         CreatePaymentCredentialRequest request);
+
+        List<GetPaymentCredentialResponse> getAllPaymentCredentials(
+                        String aliasId);
 }

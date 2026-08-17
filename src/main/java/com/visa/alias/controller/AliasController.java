@@ -1,16 +1,20 @@
 package com.visa.alias.controller;
 
+import java.util.List;
+
 import com.visa.alias.dto.request.CreateAliasRequest;
 import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.UpdateAliasRequest;
 import com.visa.alias.dto.response.CreateAliasResponse;
 import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
+import com.visa.alias.dto.response.GetPaymentCredentialResponse;
 import com.visa.alias.service.AliasService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -79,6 +83,20 @@ public class AliasController {
                 CreatePaymentCredentialResponse response = aliasService.createPaymentCredential(
                                 aliasId,
                                 request);
+
+                return Response
+                                .ok(response)
+                                .build();
+        }
+
+        @GET
+        @Path("/{aliasId}/paymentCredentials")
+        public Response getAllPaymentCredentials(
+
+                        @PathParam("aliasId") @Size(min = 36, max = 36, message = "aliasId must have 36 characters") String aliasId) {
+
+                List<GetPaymentCredentialResponse> response = aliasService.getAllPaymentCredentials(
+                                aliasId);
 
                 return Response
                                 .ok(response)

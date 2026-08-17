@@ -5,6 +5,7 @@ import com.visa.alias.integration.visa.common.dto.VisaEncryptedPayload;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -43,4 +44,9 @@ public interface VisaAliasRestClient {
         Response createPaymentCredential(
                         @PathParam("aliasId") String aliasId,
                         VisaEncryptedPayload request);
+
+        @GET
+        @Path("/aliases/{aliasId}/paymentCredentials")
+        Response getAllPaymentCredentials(
+                        @PathParam("aliasId") String aliasId);
 }

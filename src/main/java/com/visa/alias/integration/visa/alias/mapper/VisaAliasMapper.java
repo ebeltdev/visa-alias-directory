@@ -6,9 +6,12 @@ import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.Identification;
 import com.visa.alias.dto.request.Profile;
 import com.visa.alias.dto.request.UpdateAliasRequest;
+import com.visa.alias.dto.response.BillingAddressResponse;
 import com.visa.alias.dto.response.CreateAliasResponse;
 import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
+import com.visa.alias.dto.response.GetPaymentCredentialResponse;
 import com.visa.alias.dto.response.PaymentCredentialResponse;
+import com.visa.alias.dto.response.PreferredForResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaBillingAddress;
 import com.visa.alias.integration.visa.alias.dto.VisaConsent;
 import com.visa.alias.integration.visa.alias.dto.VisaContactInfo;
@@ -16,6 +19,7 @@ import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialResponse;
+import com.visa.alias.integration.visa.alias.dto.VisaGetPaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaIdentification;
 import com.visa.alias.integration.visa.alias.dto.VisaPreferredFor;
 import com.visa.alias.integration.visa.alias.dto.VisaProfile;
@@ -113,6 +117,64 @@ public final class VisaAliasMapper {
                                 response.id(),
                                 response.type(),
                                 response.externalId());
+        }
+
+        public static GetPaymentCredentialResponse toResponse(
+                        VisaGetPaymentCredentialResponse response) {
+
+                BillingAddressResponse billingAddress = null;
+
+                if (response.billingAddress() != null) {
+                        billingAddress = new BillingAddressResponse(
+                                        response.billingAddress().country(),
+                                        response.billingAddress().addressLine1(),
+                                        response.billingAddress().addressLine2(),
+                                        response.billingAddress().buildingNumber(),
+                                        response.billingAddress().city(),
+                                        response.billingAddress().minorSubdivisionCode(),
+                                        response.billingAddress().postalCode(),
+                                        response.billingAddress().state(),
+                                        response.billingAddress().streetName());
+                }
+
+                var preferredFor = response.preferredFor() == null
+                                ? null
+                                : response.preferredFor()
+                                                .stream()
+                                                .map(item -> new PreferredForResponse(
+                                                                item.type(),
+                                                                item.date()))
+                                                .toList();
+
+                return new GetPaymentCredentialResponse(
+                                response.id(),
+                                response.type(),
+                                response.accountNumber(),
+                                response.accountNumberType(),
+                                billingAddress,
+                                response.cardType(),
+                                response.createdOn(),
+                                response.currencyCode(),
+                                response.expirationDate(),
+                                response.externalId(),
+                                response.issuerName(),
+                                response.lastFourDigits(),
+                                response.lastUpdatedOn(),
+                                response.nameOnCard(),
+                                preferredFor,
+                                response.status());
+        }
+
+        public static List<GetPaymentCredentialResponse> toResponse(
+                        List<VisaGetPaymentCredentialResponse> responses) {
+
+                if (responses == null) {
+                        return List.of();
+                }
+
+                return responses.stream()
+                                .map(VisaAliasMapper::toResponse)
+                                .toList();
         }
 
         private static VisaConsent toVisaConsent(
