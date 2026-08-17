@@ -5,7 +5,9 @@ import com.visa.alias.integration.visa.common.dto.VisaEncryptedPayload;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -22,6 +24,11 @@ public interface VisaAliasRestClient {
     @POST
     @Path("/aliases")
     Response createAlias(
-            VisaEncryptedPayload request
-    );
+            VisaEncryptedPayload request);
+
+    @PUT
+    @Path("/aliases/{aliasId}")
+    Response updateAlias(
+            @PathParam("aliasId") String aliasId,
+            VisaEncryptedPayload request);
 }

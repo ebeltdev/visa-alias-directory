@@ -7,10 +7,10 @@ import com.visa.alias.exception.VisaApiException;
 import com.visa.alias.exception.VisaIntegrationException;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaCreateAliasResponse;
+import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasRequest;
 import com.visa.alias.integration.visa.common.dto.VisaEncryptedPayload;
 import com.visa.alias.integration.visa.crypto.MleDecryptionService;
 import com.visa.alias.integration.visa.crypto.MleEncryptionService;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -44,39 +44,108 @@ public class VisaAliasClient {
 
                         try (Response response = restClient.createAlias(encryptedPayload)) {
 
-                                String responseBody = response.readEntity(String.class);
+                                int status = response.getStatus();
 
-                                VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
-                                                responseBody,
-                                                VisaEncryptedPayload.class);
+                                if (status >= 200 && status < 300) {
 
-                                String decryptedJson = mleDecryptionService.decrypt(
-                                                encryptedResponse.encData());
+                                        String responseBody = response.readEntity(String.class);
 
-                                if (response.getStatusInfo()
-                                                .getFamily() == Response.Status.Family.SUCCESSFUL) {
+                                        VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
+                                                        responseBody,
+                                                        VisaEncryptedPayload.class);
+
+                                        String decryptedJson = mleDecryptionService.decrypt(
+                                                        encryptedResponse.encData());
 
                                         return objectMapper.readValue(
                                                         decryptedJson,
                                                         VisaCreateAliasResponse.class);
                                 }
 
-                                VisaErrorResponse visaError = objectMapper.readValue(
-                                                decryptedJson,
-                                                VisaErrorResponse.class);
+                                handleVisaError(response);
 
-                                throw new VisaApiException(
-                                                response.getStatus(),
-                                                visaError.errorCode(),
-                                                visaError.errorMessages());
+                                // Nunca debería alcanzarse porque handleVisaError lanza excepción.
+                                throw new VisaIntegrationException(
+                                                "Unexpected response from Visa Alias Directory");
                         }
+
+                } catch (VisaApiException e) {
+                        throw e;
+
+                } catch (VisaIntegrationException e) {
+                        throw e;
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to create alias in Visa Alias Directory",
+                                        e);
+                }
+        }
+
+        public void updateAlias(
+                        String aliasId,
+                        VisaUpdateAliasRequest request) {
+
+                try {
+                        String requestJson = objectMapper.writeValueAsString(request);
+
+                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
+
+                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+
+                        try (Response response = restClient.updateAlias(
+                                        aliasId,
+                                        encryptedPayload)) {
+
+                                int status = response.getStatus();
+
+                                if (status >= 200 && status < 300) {
+                                        return;
+                                }
+
+                                handleVisaError(response);
+                        }
+
+                } catch (VisaApiException e) {
+                        throw e;
+
+                } catch (VisaIntegrationException e) {
+                        throw e;
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to update alias in Visa Alias Directory",
+                                        e);
+                }
+        }
+
+        private void handleVisaError(Response response) {
+
+                try {
+                        String responseBody = response.readEntity(String.class);
+
+                        VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
+                                        responseBody,
+                                        VisaEncryptedPayload.class);
+
+                        String decryptedJson = mleDecryptionService.decrypt(
+                                        encryptedResponse.encData());
+
+                        VisaErrorResponse visaError = objectMapper.readValue(
+                                        decryptedJson,
+                                        VisaErrorResponse.class);
+
+                        throw new VisaApiException(
+                                        response.getStatus(),
+                                        visaError.errorCode(),
+                                        visaError.errorMessages());
 
                 } catch (VisaApiException e) {
                         throw e;
 
                 } catch (Exception e) {
                         throw new VisaIntegrationException(
-                                        "Unable to communicate with Visa Alias Directory",
+                                        "Unable to process Visa error response",
                                         e);
                 }
         }
