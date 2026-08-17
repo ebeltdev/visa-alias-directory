@@ -32,4 +32,7 @@ public interface AliasService {
         void updatePaymentCredential(
                         String paymentCredentialId,
                         UpdatePaymentCredentialRequest request);
+
+        void deletePaymentCredential(
+                        String paymentCredentialId);
 }

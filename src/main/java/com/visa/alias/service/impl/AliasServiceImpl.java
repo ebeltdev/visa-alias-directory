@@ -92,4 +92,12 @@ public class AliasServiceImpl implements AliasService {
                                 paymentCredentialId,
                                 visaRequest);
         }
+
+        @Override
+        public void deletePaymentCredential(
+                        String paymentCredentialId) {
+
+                visaAliasClient.deletePaymentCredential(
+                                paymentCredentialId);
+        }
 }

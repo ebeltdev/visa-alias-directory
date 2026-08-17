@@ -314,4 +314,31 @@ public class VisaAliasClient {
                                         e);
                 }
         }
+
+        public void deletePaymentCredential(
+                        String paymentCredentialId) {
+
+                try (Response response = restClient.deletePaymentCredential(
+                                paymentCredentialId)) {
+
+                        int status = response.getStatus();
+
+                        if (status >= 200 && status < 300) {
+                                return;
+                        }
+
+                        handleVisaError(response);
+
+                } catch (VisaApiException e) {
+                        throw e;
+
+                } catch (VisaIntegrationException e) {
+                        throw e;
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to delete payment credential in Visa Alias Directory",
+                                        e);
+                }
+        }
 }

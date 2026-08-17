@@ -121,4 +121,18 @@ public class AliasController {
                                 .noContent()
                                 .build();
         }
+
+        @DELETE
+        @Path("/paymentCredentials/{paymentCredentialId}")
+        public Response deletePaymentCredential(
+
+                        @PathParam("paymentCredentialId") @Size(min = 36, max = 36, message = "paymentCredentialId must have 36 characters") String paymentCredentialId) {
+
+                aliasService.deletePaymentCredential(
+                                paymentCredentialId);
+
+                return Response
+                                .noContent()
+                                .build();
+        }
 }
