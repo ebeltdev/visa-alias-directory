@@ -11,6 +11,7 @@ import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialRequ
 import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaGetPaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasRequest;
+import com.visa.alias.integration.visa.alias.dto.VisaUpdatePaymentCredentialRequest;
 import com.visa.alias.integration.visa.common.dto.VisaEncryptedPayload;
 import com.visa.alias.integration.visa.crypto.MleDecryptionService;
 import com.visa.alias.integration.visa.crypto.MleEncryptionService;
@@ -217,6 +218,43 @@ public class VisaAliasClient {
                 } catch (Exception e) {
                         throw new VisaIntegrationException(
                                         "Unable to update alias in Visa Alias Directory",
+                                        e);
+                }
+        }
+
+        public void updatePaymentCredential(
+                        String paymentCredentialId,
+                        VisaUpdatePaymentCredentialRequest request) {
+
+                try {
+                        String requestJson = objectMapper.writeValueAsString(request);
+
+                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
+
+                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+
+                        try (Response response = restClient.updatePaymentCredential(
+                                        paymentCredentialId,
+                                        encryptedPayload)) {
+
+                                int status = response.getStatus();
+
+                                if (status >= 200 && status < 300) {
+                                        return;
+                                }
+
+                                handleVisaError(response);
+                        }
+
+                } catch (VisaApiException e) {
+                        throw e;
+
+                } catch (VisaIntegrationException e) {
+                        throw e;
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to update payment credential in Visa Alias Directory",
                                         e);
                 }
         }

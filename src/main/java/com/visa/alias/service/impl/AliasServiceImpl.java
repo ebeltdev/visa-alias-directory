@@ -5,6 +5,7 @@ import java.util.List;
 import com.visa.alias.dto.request.CreateAliasRequest;
 import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.UpdateAliasRequest;
+import com.visa.alias.dto.request.UpdatePaymentCredentialRequest;
 import com.visa.alias.dto.response.CreateAliasResponse;
 import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
 import com.visa.alias.dto.response.GetPaymentCredentialResponse;
@@ -15,6 +16,7 @@ import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialRequ
 import com.visa.alias.integration.visa.alias.dto.VisaCreatePaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaGetPaymentCredentialResponse;
 import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasRequest;
+import com.visa.alias.integration.visa.alias.dto.VisaUpdatePaymentCredentialRequest;
 import com.visa.alias.integration.visa.alias.mapper.VisaAliasMapper;
 import com.visa.alias.service.AliasService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -77,5 +79,17 @@ public class AliasServiceImpl implements AliasService {
                                 visaRequest);
 
                 return VisaAliasMapper.toResponse(visaResponse);
+        }
+
+        @Override
+        public void updatePaymentCredential(
+                        String paymentCredentialId,
+                        UpdatePaymentCredentialRequest request) {
+
+                VisaUpdatePaymentCredentialRequest visaRequest = VisaAliasMapper.toVisaRequest(request);
+
+                visaAliasClient.updatePaymentCredential(
+                                paymentCredentialId,
+                                visaRequest);
         }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.visa.alias.dto.request.CreateAliasRequest;
 import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.UpdateAliasRequest;
+import com.visa.alias.dto.request.UpdatePaymentCredentialRequest;
 import com.visa.alias.dto.response.CreateAliasResponse;
 import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
 import com.visa.alias.dto.response.GetPaymentCredentialResponse;
@@ -23,7 +24,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/api/v1/aliases")
+@Path("/api/v1")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AliasController {
@@ -32,6 +33,7 @@ public class AliasController {
         AliasService aliasService;
 
         @POST
+        @Path("/aliases")
         public Response createAlias(@Valid CreateAliasRequest request) {
 
                 CreateAliasResponse response = aliasService.createAlias(request);
@@ -43,7 +45,7 @@ public class AliasController {
         }
 
         @PUT
-        @Path("/{aliasId}")
+        @Path("/aliases/{aliasId}")
         public Response updateAlias(
 
                         @PathParam("aliasId") @Size(min = 36, max = 36, message = "aliasId must have 36 characters") String aliasId,
@@ -60,7 +62,7 @@ public class AliasController {
         }
 
         @DELETE
-        @Path("/{aliasId}")
+        @Path("/aliases/{aliasId}")
         public Response deleteAlias(
 
                         @PathParam("aliasId") @Size(min = 36, max = 36, message = "aliasId must have 36 characters") String aliasId) {
@@ -73,7 +75,7 @@ public class AliasController {
         }
 
         @POST
-        @Path("/{aliasId}/paymentCredentials")
+        @Path("/aliases/{aliasId}/paymentCredentials")
         public Response createPaymentCredential(
 
                         @PathParam("aliasId") @Size(min = 36, max = 36, message = "aliasId must have 36 characters") String aliasId,
@@ -90,7 +92,7 @@ public class AliasController {
         }
 
         @GET
-        @Path("/{aliasId}/paymentCredentials")
+        @Path("/aliases/{aliasId}/paymentCredentials")
         public Response getAllPaymentCredentials(
 
                         @PathParam("aliasId") @Size(min = 36, max = 36, message = "aliasId must have 36 characters") String aliasId) {
@@ -100,6 +102,23 @@ public class AliasController {
 
                 return Response
                                 .ok(response)
+                                .build();
+        }
+
+        @PUT
+        @Path("/paymentCredentials/{paymentCredentialId}")
+        public Response updatePaymentCredential(
+
+                        @PathParam("paymentCredentialId") @Size(min = 36, max = 36, message = "paymentCredentialId must have 36 characters") String paymentCredentialId,
+
+                        @Valid UpdatePaymentCredentialRequest request) {
+
+                aliasService.updatePaymentCredential(
+                                paymentCredentialId,
+                                request);
+
+                return Response
+                                .noContent()
                                 .build();
         }
 }

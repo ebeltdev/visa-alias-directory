@@ -6,6 +6,7 @@ import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.Identification;
 import com.visa.alias.dto.request.Profile;
 import com.visa.alias.dto.request.UpdateAliasRequest;
+import com.visa.alias.dto.request.UpdatePaymentCredentialRequest;
 import com.visa.alias.dto.response.BillingAddressResponse;
 import com.visa.alias.dto.response.CreateAliasResponse;
 import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
@@ -24,6 +25,7 @@ import com.visa.alias.integration.visa.alias.dto.VisaIdentification;
 import com.visa.alias.integration.visa.alias.dto.VisaPreferredFor;
 import com.visa.alias.integration.visa.alias.dto.VisaProfile;
 import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasRequest;
+import com.visa.alias.integration.visa.alias.dto.VisaUpdatePaymentCredentialRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaVerificationDetails;
 
 import java.util.List;
@@ -89,6 +91,42 @@ public final class VisaAliasMapper {
                                 toVisaConsent(request.consent()),
                                 toVisaProfile(request.profile()),
                                 toVisaIdentification(request.identification()));
+        }
+
+        public static VisaUpdatePaymentCredentialRequest toVisaRequest(
+                        UpdatePaymentCredentialRequest request) {
+
+                VisaBillingAddress billingAddress = request.billingAddress() == null
+                                ? null
+                                : new VisaBillingAddress(
+                                                request.billingAddress().country(),
+                                                request.billingAddress().addressLine1(),
+                                                request.billingAddress().addressLine2(),
+                                                request.billingAddress().buildingNumber(),
+                                                request.billingAddress().city(),
+                                                request.billingAddress().minorSubdivisionCode(),
+                                                request.billingAddress().postalCode(),
+                                                request.billingAddress().state(),
+                                                request.billingAddress().streetName());
+
+                var preferredFor = request.preferredFor() == null
+                                ? null
+                                : request.preferredFor()
+                                                .stream()
+                                                .map(item -> new VisaPreferredFor(
+                                                                item.type()))
+                                                .toList();
+
+                return new VisaUpdatePaymentCredentialRequest(
+                                billingAddress,
+                                request.expirationDate(),
+                                request.nameOnCard(),
+                                request.type(),
+                                request.cardType(),
+                                request.currencyCode(),
+                                request.externalId(),
+                                request.issuerName(),
+                                preferredFor);
         }
 
         public static CreateAliasResponse toResponse(
