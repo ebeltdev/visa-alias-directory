@@ -6,6 +6,7 @@ import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.Identification;
 import com.visa.alias.dto.request.Profile;
 import com.visa.alias.dto.request.UpdateAliasRequest;
+import com.visa.alias.dto.request.UpdateAliasStatusRequest;
 import com.visa.alias.dto.request.UpdatePaymentCredentialRequest;
 import com.visa.alias.dto.response.BillingAddressResponse;
 import com.visa.alias.dto.response.CreateAliasResponse;
@@ -25,6 +26,7 @@ import com.visa.alias.integration.visa.alias.dto.VisaIdentification;
 import com.visa.alias.integration.visa.alias.dto.VisaPreferredFor;
 import com.visa.alias.integration.visa.alias.dto.VisaProfile;
 import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasRequest;
+import com.visa.alias.integration.visa.alias.dto.VisaUpdateAliasStatusRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaUpdatePaymentCredentialRequest;
 import com.visa.alias.integration.visa.alias.dto.VisaVerificationDetails;
 
@@ -127,6 +129,13 @@ public final class VisaAliasMapper {
                                 request.externalId(),
                                 request.issuerName(),
                                 preferredFor);
+        }
+
+        public static VisaUpdateAliasStatusRequest toVisaRequest(
+                        UpdateAliasStatusRequest request) {
+
+                return new VisaUpdateAliasStatusRequest(
+                                request.status());
         }
 
         public static CreateAliasResponse toResponse(

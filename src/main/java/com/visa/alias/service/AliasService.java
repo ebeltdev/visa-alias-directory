@@ -5,6 +5,7 @@ import java.util.List;
 import com.visa.alias.dto.request.CreateAliasRequest;
 import com.visa.alias.dto.request.CreatePaymentCredentialRequest;
 import com.visa.alias.dto.request.UpdateAliasRequest;
+import com.visa.alias.dto.request.UpdateAliasStatusRequest;
 import com.visa.alias.dto.request.UpdatePaymentCredentialRequest;
 import com.visa.alias.dto.response.CreateAliasResponse;
 import com.visa.alias.dto.response.CreatePaymentCredentialResponse;
@@ -35,4 +36,8 @@ public interface AliasService {
 
         void deletePaymentCredential(
                         String paymentCredentialId);
+
+        void updateAliasStatus(
+                        String aliasId,
+                        UpdateAliasStatusRequest request);
 }

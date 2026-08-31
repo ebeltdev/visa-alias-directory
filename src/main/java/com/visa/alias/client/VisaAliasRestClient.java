@@ -60,4 +60,10 @@ public interface VisaAliasRestClient {
         @Path("/paymentCredentials/{paymentCredentialId}")
         Response deletePaymentCredential(
                         @PathParam("paymentCredentialId") String paymentCredentialId);
+
+        @PUT
+        @Path("/aliases/{aliasId}/status")
+        Response updateAliasStatus(
+                        @PathParam("aliasId") String aliasId,
+                        VisaEncryptedPayload request);
 }
