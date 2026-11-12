@@ -1,5 +1,6 @@
 package com.visa.alias.integration.visa.alias;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.visa.alias.client.VisaAliasRestClient;
 import com.visa.alias.dto.visa.VisaErrorResponse;
@@ -16,6 +17,8 @@ import com.visa.alias.integration.visa.alias.dto.VisaUpdatePaymentCredentialRequ
 import com.visa.alias.integration.visa.common.dto.VisaEncryptedPayload;
 import com.visa.alias.integration.visa.crypto.MleDecryptionService;
 import com.visa.alias.integration.visa.crypto.MleEncryptionService;
+
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -49,21 +52,15 @@ public class VisaAliasClient {
 
                         if (status >= 200 && status < 300) {
 
-                                String responseBody = response.readEntity(String.class);
+                                JavaType responseType = objectMapper
+                                                .getTypeFactory()
+                                                .constructCollectionType(
+                                                                List.class,
+                                                                VisaGetPaymentCredentialResponse.class);
 
-                                VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
-                                                responseBody,
-                                                VisaEncryptedPayload.class);
-
-                                String decryptedJson = mleDecryptionService.decrypt(
-                                                encryptedResponse.encData());
-
-                                return objectMapper.readValue(
-                                                decryptedJson,
-                                                objectMapper.getTypeFactory()
-                                                                .constructCollectionType(
-                                                                                List.class,
-                                                                                VisaGetPaymentCredentialResponse.class));
+                                return decryptPayload(
+                                                response,
+                                                responseType);
                         }
 
                         handleVisaError(response);
@@ -88,11 +85,9 @@ public class VisaAliasClient {
                         VisaCreateAliasRequest request) {
 
                 try {
-                        String requestJson = objectMapper.writeValueAsString(request);
-
-                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
-
-                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+                        VisaEncryptedPayload encryptedPayload = encryptPayload(request);
+                        
+                        Log.info(encryptedPayload);
 
                         try (Response response = restClient.createAlias(encryptedPayload)) {
 
@@ -100,17 +95,8 @@ public class VisaAliasClient {
 
                                 if (status >= 200 && status < 300) {
 
-                                        String responseBody = response.readEntity(String.class);
-
-                                        VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
-                                                        responseBody,
-                                                        VisaEncryptedPayload.class);
-
-                                        String decryptedJson = mleDecryptionService.decrypt(
-                                                        encryptedResponse.encData());
-
-                                        return objectMapper.readValue(
-                                                        decryptedJson,
+                                        return decryptPayload(
+                                                        response,
                                                         VisaCreateAliasResponse.class);
                                 }
 
@@ -139,11 +125,7 @@ public class VisaAliasClient {
                         VisaCreatePaymentCredentialRequest request) {
 
                 try {
-                        String requestJson = objectMapper.writeValueAsString(request);
-
-                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
-
-                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+                        VisaEncryptedPayload encryptedPayload = encryptPayload(request);
 
                         try (Response response = restClient.createPaymentCredential(
                                         aliasId,
@@ -153,17 +135,8 @@ public class VisaAliasClient {
 
                                 if (status >= 200 && status < 300) {
 
-                                        String responseBody = response.readEntity(String.class);
-
-                                        VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
-                                                        responseBody,
-                                                        VisaEncryptedPayload.class);
-
-                                        String decryptedJson = mleDecryptionService.decrypt(
-                                                        encryptedResponse.encData());
-
-                                        return objectMapper.readValue(
-                                                        decryptedJson,
+                                        return decryptPayload(
+                                                        response,
                                                         VisaCreatePaymentCredentialResponse.class);
                                 }
 
@@ -191,11 +164,7 @@ public class VisaAliasClient {
                         VisaUpdateAliasRequest request) {
 
                 try {
-                        String requestJson = objectMapper.writeValueAsString(request);
-
-                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
-
-                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+                        VisaEncryptedPayload encryptedPayload = encryptPayload(request);
 
                         try (Response response = restClient.updateAlias(
                                         aliasId,
@@ -228,11 +197,7 @@ public class VisaAliasClient {
                         VisaUpdateAliasStatusRequest request) {
 
                 try {
-                        String requestJson = objectMapper.writeValueAsString(request);
-
-                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
-
-                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+                        VisaEncryptedPayload encryptedPayload = encryptPayload(request);
 
                         try (Response response = restClient.updateAliasStatus(
                                         aliasId,
@@ -265,11 +230,7 @@ public class VisaAliasClient {
                         VisaUpdatePaymentCredentialRequest request) {
 
                 try {
-                        String requestJson = objectMapper.writeValueAsString(request);
-
-                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
-
-                        VisaEncryptedPayload encryptedPayload = new VisaEncryptedPayload(encryptedRequest);
+                        VisaEncryptedPayload encryptedPayload = encryptPayload(request);
 
                         try (Response response = restClient.updatePaymentCredential(
                                         paymentCredentialId,
@@ -376,6 +337,76 @@ public class VisaAliasClient {
                 } catch (Exception e) {
                         throw new VisaIntegrationException(
                                         "Unable to delete payment credential in Visa Alias Directory",
+                                        e);
+                }
+        }
+
+        private VisaEncryptedPayload encryptPayload(Object request) {
+                try {
+                        String requestJson = objectMapper.writeValueAsString(request);
+
+                        String encryptedRequest = mleEncryptionService.encrypt(requestJson);
+
+                        return new VisaEncryptedPayload(
+                                        encryptedRequest);
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to encrypt Visa request payload",
+                                        e);
+                }
+        }
+
+        private <T> T decryptPayload(
+                        Response response,
+                        Class<T> responseType) {
+
+                try {
+                        String decryptedJson = decryptPayload(response);
+
+                        return objectMapper.readValue(
+                                        decryptedJson,
+                                        responseType);
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to decrypt Visa response payload",
+                                        e);
+                }
+        }
+
+        private <T> T decryptPayload(
+                        Response response,
+                        JavaType responseType) {
+
+                try {
+                        String decryptedJson = decryptPayload(response);
+
+                        return objectMapper.readValue(
+                                        decryptedJson,
+                                        responseType);
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to decrypt Visa response payload",
+                                        e);
+                }
+        }
+
+        private String decryptPayload(Response response) {
+                try {
+                        String responseBody = response.readEntity(String.class);
+
+                        VisaEncryptedPayload encryptedResponse = objectMapper.readValue(
+                                        responseBody,
+                                        VisaEncryptedPayload.class);
+
+                        return mleDecryptionService.decrypt(
+                                        encryptedResponse.encData());
+
+                } catch (Exception e) {
+                        throw new VisaIntegrationException(
+                                        "Unable to decrypt Visa response payload",
                                         e);
                 }
         }
